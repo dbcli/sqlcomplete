@@ -1,2 +1,14 @@
 # sqlcomplete
-SQL Completion engine written in Python
+
+Python library that provides SQL Completion.
+
+# Installation
+
+    pip install sqlcomplete
+
+# Usage
+
+
+# Tests
+
+    pytest --cov=sqlcomplete tests
