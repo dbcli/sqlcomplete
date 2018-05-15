@@ -13,6 +13,8 @@ from sqlcomplete.completion_engine import (
     Alias,
     JoinCondition,
     Join,
+    Path,
+    NamedQuery,
 )
 from sqlcomplete.parseutils.tables import TableReference
 import pytest
@@ -881,7 +883,6 @@ def test_create_db_with_template():
 @pytest.mark.parametrize("initial_text", ("", "    ", "\t \t"))
 def test_specials_included_for_initial_completion(initial_text):
     suggestions = suggest_type(initial_text, initial_text)
-
     assert set(suggestions) == set([Keyword(), Special()])
 
 
@@ -1057,3 +1058,65 @@ def test_handle_unrecognized_kw_generously():
 @pytest.mark.parametrize("sql", ["ALTER ", "ALTER TABLE foo ALTER "])
 def test_keyword_after_alter(sql):
     assert Keyword("ALTER") in set(suggest_type(sql, sql))
+
+def test_path_completer():
+    sql = "\\i "
+    suggestions = suggest_type(sql, sql)
+    expected = (Path(),)
+    assert expected == suggestions
+
+def test_specials_suggested_after_slash():
+    sql = "\\"
+    suggestions = suggest_type(sql, sql)
+    expected = (Special(),)
+    assert expected == suggestions
+
+def test_dbs_suggested_after_slash_c():
+    sql = "\\c "
+    suggestions = suggest_type(sql, sql)
+    expected = (Database(),)
+    assert expected == suggestions
+
+def test_schemas_suggested_after_slash_dn():
+    sql = "\\dn "
+    suggestions = suggest_type(sql, sql)
+    expected = (Schema(),)
+    assert expected == suggestions
+
+def test_schemas_views_tables_suggested_after_slash_d():
+    sql = "\\d "
+    suggestions = suggest_type(sql, sql)
+    expected = (Schema(), Table(schema=None), View(schema=None))
+    assert expected == suggestions
+
+def test_schemas_views_tables_suggested_after_slash_d_arg_with_wildcards():
+    sql = "\\d abc??"
+    suggestions = suggest_type(sql, sql)
+    expected = (Schema(), Table(schema=None), View(schema=None))
+    assert expected == suggestions
+
+def test_schema_scoped_views_tables_suggested_after_slash_d_schema():
+    sql = "\\d abc."
+    suggestions = suggest_type(sql, sql)
+    expected = (Table(schema='abc'), View(schema='abc'))
+    assert expected == suggestions
+
+@pytest.mark.parametrize("sql, rel_type", [("\\dT ", Datatype), ("\\df ", Function), ("\\dt ", Table), ("\\dv ", View), ("\\sf ", Function)])
+def test_specials_suggestion_datatype(sql, rel_type):
+    suggestions = suggest_type(sql, sql)
+    if rel_type == Function:
+        assert suggestions == (Schema(), rel_type(schema=None, usage="special"))
+    else:
+        assert suggestions == (Schema(), rel_type(schema=None))
+
+    sql = sql + 'abc.'
+    suggestions = suggest_type(sql, sql)
+    if rel_type == Function:
+        assert suggestions == (rel_type(schema='abc', usage="special"),)
+    else:
+        assert suggestions == (rel_type(schema='abc'),)
+
+@pytest.mark.parametrize("sql", ["\\n ", "\\ns ", "\\nd "])
+def test_named_query_suggestions(sql):
+    suggestions = suggest_type(sql, sql)
+    assert suggestions == (NamedQuery(),)
