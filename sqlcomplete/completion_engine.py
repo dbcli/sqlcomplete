@@ -23,6 +23,7 @@ Special = namedtuple('Special', [])
 Database = namedtuple('Database', [])
 Schema = namedtuple('Schema', ['quoted'])
 Schema.__new__.__defaults__ = (False,)
+
 # FromClauseItem is a table/view/function used in the FROM clause
 # `table_refs` contains the list of tables/... already in the statement,
 # used to ensure that the alias we suggest is unique
