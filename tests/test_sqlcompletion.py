@@ -1,4 +1,4 @@
-from sqlcomplete import (
+from sqlcomplete.completion_engine import (
     suggest_type, Special, Database, Schema, Table, Column, View, Keyword,
     FromClauseItem, Function, Datatype, Alias, JoinCondition, Join)
 from sqlcomplete.parseutils.tables import TableReference

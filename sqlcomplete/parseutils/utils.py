@@ -138,3 +138,11 @@ def parse_partial_identifier(word):
         return parse_partial_identifier(word + '"')
     else:
         return None
+
+def parse_special_command(sql):
+    command, _, arg = sql.partition(' ')
+    verbose = '+' in command
+
+    command = command.strip().replace('+', '')
+    return (command, verbose, arg.strip())
+
