@@ -4,4 +4,4 @@ __pycache__
 .coverage
 .tox/
 .pytest_cache/
-
+htmlcov
