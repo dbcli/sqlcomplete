@@ -122,12 +122,11 @@ class FunctionMetadata(object):
                 "arg_types=%r, arg_modes=%r, return_type=%r, is_aggregate=%r, "
                 "is_window=%r, is_set_returning=%r, arg_defaults=%r)"
             )
-            % (self.__class__.__name__,)
-            + self._signature()
+            % (self.__class__.__name__, *self._signature())
         )
 
     def has_variadic(self):
-        return self.arg_modes and any(arg_mode == "v" for arg_mode in self.arg_modes)
+        return bool(self.arg_modes and any(arg_mode == "v" for arg_mode in self.arg_modes))
 
     def args(self):
         """Returns a list of input-parameter ColumnMetadata namedtuples."""
